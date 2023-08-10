@@ -1,41 +1,32 @@
-import { useState } from 'react'
 import { useQuery } from '@apollo/client';
-import { PeopleQuery, PeopleQueryVariables, PeopleDocument } from '@/generated/gql/graphql';
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import {
+  PeopleQuery,
+  PeopleQueryVariables,
+  PeopleDocument,
+  Person,
+  PersonQuery,
+  PersonQueryVariables,
+  PersonDocument,
+} from '@/generated/gql/graphql';
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-  const { data, loading, error } = useQuery<PeopleQuery, PeopleQueryVariables>(PeopleDocument);
+  const { data, loading: peopleLoading } = useQuery<PeopleQuery, PeopleQueryVariables>(PeopleDocument);
+  const { data: personData, loading: personLoading } = useQuery<PersonQuery, PersonQueryVariables>(PersonDocument, {
+    variables: { personId: 'cGVvcGxlOjc5' }
+  });
 
-  if (loading) return 'loading';
-  if (error) return 'error happened';
+
+  if (peopleLoading || personLoading) return 'people loading'
+  const { person } = personData;
 
   return (
     <>
+      <h3>
+        Person: {!personLoading && person.name}
+      </h3>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <div>
-        {data!.allPeople!.people.map((l) => (<p key={l!.id}>{l!.name}</p>))}
+        {data!.allPeople!.people.map((p: Person) => (<p key={p!.id}>{p!.name}: {p.id}</p>))}
       </div>
     </>
   )
